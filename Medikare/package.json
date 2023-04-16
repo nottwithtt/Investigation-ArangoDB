@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "arangojs": "^5.8.0",
+    "bcrypt": "^5.1.0",
+    "express": "^4.18.2"
+  },
+  "name": "medikare",
+  "version": "1.0.0",
+  "main": "connection.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
