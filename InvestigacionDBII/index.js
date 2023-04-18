@@ -128,13 +128,13 @@ async function getAvailableAppointment(){
     console.log(array)
 }
 
-async function getAreaCategory(){
-    let collection = db.collection('AreaCategory');
+async function getCategoryArea(){
+    let collection = db.collection('categoryArea');
     let cursor = await db.query(
         aql`FOR doc in ${collection}
         RETURN doc`)
     let array = await cursor.all();
-    console.log(array);
+    console.log(array); 
 }
 
 async function getBookedAppointments(){
