@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../Images/Icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../bootstrap-5.3.0-alpha3-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" >
+    <title>Home</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+        *{
+            margin:0;
+            padding:0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        .wrapper{
+            width: 900px;
+            background: #fff0f3;
+            border-radius: 3%;
+        }
+        .wrapper header{
+            display:flex;
+            align-items: center;
+            padding: 25px 60px 0px;
+            justify-content: space-between;
+        }
+ 
+        header .current-date{
+            font-size: 1.45rem;
+            font-weight:500;
+        }
+
+        header .icons span{
+            height: 38px;
+            width: 38px;
+            color: #878787;
+            font-size: 1.9rem; 
+            margin: 0 10px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 38px;
+            border-radius: 50%;
+        }
+
+        header .icons span:hover{
+            background: #ffccd5;
+        }
+
+        .calendar{
+            padding:20px;
+            margin-left: 0px;
+        }
+        
+        .calendar ul{
+            display:flex;
+            list-style:none;
+            flex-wrap:wrap;
+            text-align: center;
+        }
+         
+        header .icons span:last-chlid{
+            margin-right: -10px;
+        }
+
+        
+        .calendar .weeks li{
+            font-weight: 600;
+            color: #cc2453;
+        }
+
+
+        .calendar .days{
+            margin-bottom: 20px;
+        }
+
+        .calendar ul li{
+            position: relative;
+            width: calc(100% / 7);
+        }
+
+        .calendar .days li{
+            z-index: 1;
+            cursor:pointer;
+            margin-top: 30px;
+        }
+
+        .calendar .days li::before{
+            position: absolute;
+            content: "";
+            height: 40px;
+            width: 40px;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            
+        }
+        .days li:hover::before{
+            background: #ffccd5;
+        }
+
+        .days li.inactive{
+            color: #aaa;
+        }
+
+        .days li.active{
+            color: white;
+        }
+
+        .days li.active::before{
+            background: #ff758f;
+        }
+
+        .days li.selected{
+            color: white;
+        }
+
+        .days li.selected::before{
+            background: #800f2f;
+        }
+
+        .days li.available{
+            color: white;
+        }
+
+        .days li.available::before{
+            background: #36be42;
+        }
+
+        .days li.booked{
+            color: white;
+        }
+
+        .days li.booked::before{
+            background: #d12424;
+        }
+        </style>
+    </head>
+<body>
+
+    <!--Navbar -->
+    <div class="navbar  navbar-expand-sm" style="background-color: #ff4d6d;">
+        <div class="col d-flex justify-content-start">
+                <img src="../Images/Icons/logoHospitalBlanco.png" style="max-width: 3vw; height: 3vw; margin-left: 0.5vw;">
+                <p class="h4 mt-2 mx-2" style="font-family: 'Open Sans' , sans-serif; color: white; font-weight: bold" >MEDIKARE</p>
+        </div>
+
+        <div class="col d-flex justify-content-end">
+            <img src="../Images/Icons/profileBlanco.png" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" style="max-width: 3vw; height: 3vw;margin-right: 0.5vw;">
+        </div>
+    </div>
+    
+
+    <!-- OFF CANVAS -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Name LastName</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <label class="h6" for="txtIdCard" style="font-family: 'Open Sans', sans-serif; font-weight: bold; margin-top: 2vw;">Id Card</label>
+            <input id="txtIdCard" type="text" class="form-control form-control-sm" value="118880354" aria-label="Id Card" disabled>
+
+            <label class="h6" for="txtBirthday" style="font-family: 'Open Sans', sans-serif; font-weight: bold; margin-top: 2vw;">Birthday</label>
+            <input id="txtBirthday" type="text" class="form-control form-control-sm" value="10-11-2001" aria-label="Birthday" disabled>
+        
+            <!-- Button SignOut -->
+            <button class="btn btn-danger" type="button" style="margin-top: 26.2vw;">Sign Out</button>
+        
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="container" style="padding-left: 15vw; padding-right: 15vw;">
+        <div class="row">
+            <div class="col-12 mt-4">
+                <p class="h4 mt-3" style="font-family: 'Open Sans' , sans-serif;font-weight: bold; color: #c91414;">Title</p>
+            </div>
+
+            <div class="wrapper">
+                <header>
+                    <p class="current-date" ></p>
+                    <div class="icons">
+                        <span id="prev" class="material-symbols-rounded">chevron_left</span>
+                        <span id="next" class="material-symbols-rounded">chevron_right</span>
+                    </div>
+                </header>
+
+                <div class="calendar" >
+                    <ul class="weeks" style="padding: 0 0 0 0;">
+                        <li>Sun</li>
+                        <li>Mon</li>
+                        <li>Tue</li>
+                        <li>Wed</li>
+                        <li>Thu</li>
+                        <li>Fri</li>
+                        <li>Sat</li>
+                    </ul>
+
+                    <ul class="days" style="padding: 0 0 0 0;">
+                    </ul>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+
+    <script src="../scripts/appointment.js"></script>
+    <script src="../bootstrap-5.3.0-alpha3-dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
