@@ -82,6 +82,7 @@ app.post('/getUser',bodyParser.json(),async(req,res) => {
     res.json({"res": getUser,"isUser": isUser});
 })
 
+
 app.post('/addPatient',bodyParser.json(),async(req,res) => {
     let idCard = req.body.idCard;
     let name = req.body.name;
@@ -91,6 +92,58 @@ app.post('/addPatient',bodyParser.json(),async(req,res) => {
     await insertUserPatient(idCard,name,lastName,birthday);
 
     res.json({});
+})
+
+app.post('/addAvailableAppointment',bodyParser.json(),async(req,res) => {
+    let idArea = req.body.idArea;
+    let date = req.body.date;
+
+    await insertAvailableAppointment(idArea,date);
+
+    res.json({});
+})
+
+app.post('/getAvailablesAppointment',bodyParser.json(),async(req,res) => {
+    let idArea = req.body.idArea;
+
+    let availableAppointments = await getAvailableAppointmentsForArea(idArea);
+
+    res.json({"res": availableAppointments});
+})
+
+app.post('/removeAvailableAppointment',bodyParser.json(),async(req,res) => {
+    let idAppointment = req.body.idAppointment;
+
+    await deleteAvailableAppointment(idAppointment);
+
+    res.json({});
+})
+
+
+
+app.post('/addAvailableAppointment',bodyParser.json(),async(req,res) => {
+    let idArea = req.body.idArea;
+    let date = req.body.date;
+    let idPatient;
+
+    await insertBookedAppointment(idArea,date,idPatient);
+
+    res.json({});
+})
+
+app.post('/getBookedAppointment',bodyParser.json(),async(req,res) => {
+    let idArea = req.body.idArea;
+
+    let availableAppointments = await getBookedAppointmentsForArea(idArea);
+
+    res.json({"res": availableAppointments});
+})
+
+app.post('/getAreas',bodyParser.json(),async(req,res) => {
+
+    let arrayAreas = await getCategoriesArea();
+
+    res.json({"res": arrayAreas});
 })
 
 // Insertar un usuario Paciente.
@@ -159,8 +212,18 @@ async function insertAvailableAppointment(idArea,date){
     })
 }
 
+/*
 async function deleteAvailableAppointment(idAppointment){
    await db.collection('availableAppointment').remove(idAppointment);
+}*/
+
+async function deleteAvailableAppointment(idAppointment){
+    let collection =  db.collection('availableAppointment');
+    
+    await db.query(
+        aql`FOR doc in ${collection}
+        FILTER doc._key == ${idAppointment}
+        REMOVE doc in ${collection}`)
 }
 
 async function insertBookedAppointment(idArea,dateB,idPatient){
@@ -170,6 +233,9 @@ async function insertBookedAppointment(idArea,dateB,idPatient){
         id_Patient: idPatient
     })
 }
+
+//insertBookedAppointment("43480",new Date(2023,5,1),"118880354");
+
 async function getAvailableAppointment(){
     let collection =  db.collection('availableAppointment');
 
@@ -181,13 +247,25 @@ async function getAvailableAppointment(){
     console.log(array)
 }
 
-async function getCategoryArea(){
+async function getAvailableAppointmentsForArea(idArea){
+    let collection =  db.collection('availableAppointment');
+
+    let cursor = await db.query(
+        aql`FOR doc in ${collection}
+        FILTER doc.id_Area == ${idArea}
+        RETURN doc`)
+
+    let array = await cursor.all();
+    return array;
+}
+
+async function getCategoriesArea(){
     let collection = db.collection('categoryArea');
     let cursor = await db.query(
         aql`FOR doc in ${collection}
         RETURN doc`)
     let array = await cursor.all();
-    console.log(array); 
+    return array;
 }
 
 async function getBookedAppointments(){
@@ -196,7 +274,21 @@ async function getBookedAppointments(){
         aql`FOR doc in ${collection}
         RETURN doc`)
     let array = await cursor.all();
-    console.log(array)
+    console.log(array);
+}
+
+async function getBookedAppointmentsForArea(idArea){
+    console.log(idArea);
+    let collection =  db.collection('bookedAppointment');
+
+    let cursor = await db.query(
+        aql`FOR doc in ${collection}
+        FILTER doc.id_Area == ${idArea}
+        RETURN doc`)
+
+    let array = await cursor.all();
+    console.log(array);
+    return array;
 }
 
 async function getbookedAppointmentPatient(idPatient){
@@ -207,7 +299,7 @@ async function getbookedAppointmentPatient(idPatient){
             RETURN doc`)
 
     let array = await cursor.all();
-    console.log(array)
+    console.log(array);
 }
 
 getAvailableAppointment()

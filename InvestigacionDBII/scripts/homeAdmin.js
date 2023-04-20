@@ -11,8 +11,8 @@ daysTag = document.querySelector(".days");
 prevNextIcon = document.querySelectorAll(".icons span");
 
 let date = new Date();
-let currYear = date.getFullYear();
-let currMonth = date.getMonth();
+let currYear = date.getUTCFullYear();
+let currMonth = date.getUTCMonth();
 
 let availableBeforeFlag = false;
 let bookedBeforeFlag = false;
@@ -20,9 +20,9 @@ let bookedBeforeFlag = false;
 
 let datesAvailable = [];
 let datesBooked = [];
-datesBooked.push(new Date (2023,5,15));
+//datesBooked.push(new Date (2023,5,15));
 
-const dateAvailable = new Date (2023,5,15);
+//const dateAvailable = new Date (2023,5,15);
 
 const months = ["January", "February" ,"March", "April", "May", "June", "July",
 "August", "September", "October", "November", "December"];
@@ -80,21 +80,22 @@ const renderCalendar = () => {
     for (let i = 1; i <= lastDateOfMonth; i++) {
         let isToday;
         
-        isToday = i === date.getDate() && currMonth === new Date().getMonth()
-        && currYear === new Date().getFullYear() ? "active" : "";
+        isToday = i === date.getUTCDate() && currMonth === new Date().getUTCMonth()
+        && currYear === new Date().getUTCFullYear() ? "active" : "";
         if (isToday != "active"){
             //isToday = i === dateAvailable.getDate() && currMonth + 1 === dateAvailable.getMonth()
             //&& currYear === dateAvailable.getFullYear() ? "available" : "";
             for (let j = 0; j < datesAvailable.length; j++) {
-                if((datesAvailable[j].getDate() == i) && (datesAvailable[j].getMonth() == currMonth + 1) &&
-                 (datesAvailable[j].getFullYear() == currYear)){
+                if((datesAvailable[j].getUTCDate() == i) && (datesAvailable[j].getUTCMonth()== currMonth) &&
+                 (datesAvailable[j].getUTCFullYear() == currYear)){
                     isToday = "available";
                 }
             }
             if(isToday != "available"){
                 for (let j = 0; j < datesBooked.length; j++) {
-                    if((datesBooked[j].getDate() == i) && (datesBooked[j].getMonth() == currMonth + 1) &&
-                     (datesBooked[j].getFullYear() == currYear)){
+                    console.log(datesBooked[j].getUTCDate() == i, datesBooked[j].getUTCMonth() == currMonth, datesBooked[j].getUTCFullYear() == currYear);
+                    if((datesBooked[j].getUTCDate() == i) && (datesBooked[j].getUTCMonth() == currMonth) &&
+                     (datesBooked[j].getUTCFullYear() == currYear)){
                         isToday = "booked";
                     }
                 }
@@ -123,6 +124,9 @@ const renderCalendar = () => {
             if (!day.classList.contains("inactive") && !day.classList.contains("booked") && !day.classList.contains("available")){
                 daySelected = day.textContent;
                 day.classList.add("selected");
+
+                let button = document.getElementById('buttonModal');
+                button.textContent = "Create Appointment";
             }
             else if (day.classList.contains("available")){
                 day.classList.remove("available");
@@ -130,6 +134,9 @@ const renderCalendar = () => {
                 day.classList.add("selected");
 
                 availableBeforeFlag = true;
+                
+                let button = document.getElementById('buttonModal');
+                button.textContent = "Delete Appointment";
             }
             else if (day.classList.contains("booked")){
                 day.classList.remove("booked");
@@ -137,6 +144,8 @@ const renderCalendar = () => {
                 day.classList.add("selected");
 
                 bookedBeforeFlag = true;
+                let button = document.getElementById('buttonModal');
+                button.textContent = "Delete Appointment";
             }
         });
     });
@@ -178,31 +187,127 @@ function removeClassSelected(){
     }
 }
 
-function buttonSelected(){
+
+
+async function createAppointment(){
+    let date;
+    let id;
+
     for (let i = 0; i < daysList.length; i++) {
         if(daysList[i].classList.contains("selected") ){
-            console.log( daysList[i].textContent, currMonth + 1, currYear);
+            date = new Date(currYear,currMonth, parseInt(daysList[i].textContent));
         }
-        
     }
 
     if (optionSelected != "None"){
-        //Obtener todos las areas y obtener el codigo de cada uno para actualizar el calendario con con las citas asociadas.
-        if (optionSelected == "Odontology"){
 
+        const res = await getAreas();
+
+        if (optionSelected == "Odontology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Odontology"){
+                    id = res[i]._key;
+                }
+            }
         }
         else if(optionSelected == "General Medicine"){
-
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "General Medicine"){
+                    id = res[i]._key;
+                }
+            }
         }
         else if (optionSelected == "Ophthamology"){
-
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Ophthamology"){
+                    id = res[i]._key;
+                }
+            }
         }
         else if(optionSelected == "Vaccination"){
-
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Vaccination"){
+                    id = res[i]._key;
+                }
+            }
         }
+
+       
+        await createAvailableAppointment(id,date);
+        
+        //await removeAvailableAppointment(id,date);
+        await onloadAvailableDates(id);
+        await onloadBookedDates(id);
+
+        renderCalendar();
+
     }
     
 
+}
+
+async function createAvailableAppointment(idAreaAppointment,dateAppointment){
+    const response = await fetch('/addAvailableAppointment',{
+        method: "POST",
+        body: JSON.stringify({idArea: idAreaAppointment,
+                              date: dateAppointment}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+
+}
+
+async function removeAvailableAppointment(idAppointment){
+
+    const response = await fetch('/removeAvailableAppointment',{
+        method: "POST",
+        body: JSON.stringify({idAppointment: idAppointment}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+}
+
+async function getAvailableAppointmentsForArea(idAreas){
+
+    const response = await fetch('/getAvailablesAppointment',{
+        method: "POST",
+        body: JSON.stringify({idArea: idAreas}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+    return responseJason.res;
+}
+
+async function getBookedAppointmentsForArea(idAreas){
+
+    const response = await fetch('/getBookedAppointment',{
+        method: "POST",
+        body: JSON.stringify({idArea: idAreas}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+    return responseJason.res;
+}
+
+async function getAreas(){
+    const response = await fetch('/getAreas',{
+        method: "POST",
+        body: JSON.stringify({}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+
+    let responseJason = await response.json();
+    return responseJason.res;
 }
 
 comboBox.addEventListener("change", function() {
@@ -210,5 +315,137 @@ comboBox.addEventListener("change", function() {
     optionSelected = valorSeleccionado.text;
 });
 
+async function changeCalendarToArea(){
+    if(optionSelected != "None"){
+        const res = await getAreas();
+
+        if (optionSelected == "Odontology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Odontology"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if(optionSelected == "General Medicine"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "General Medicine"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if (optionSelected == "Ophthamology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Ophthamology"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if(optionSelected == "Vaccination"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Vaccination"){
+                    id = res[i]._key;
+                }
+            }
+        }
+
+        //datesAvailable = await getAvailableAppointmentsForArea(id);
+        await onloadAvailableDates(id);
+        await onloadBookedDates(id);
+
+
+    }
+    renderCalendar();
+}
+
+async function onloadAvailableDates(id){
+    datesAvailable = [];
+
+    let listRes = await getAvailableAppointmentsForArea(id);
+
+    for (let i = 0; i < listRes.length; i++) {
+        let date = new Date(listRes[i].date_appointment.slice(0,10));
+        datesAvailable.push(new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate()));
+    }
+}
+
+async function onloadBookedDates(id){
+    datesBooked = [];
+
+    let listRes = await getBookedAppointmentsForArea(id);
+    
+
+    for (let i = 0; i < listRes.length; i++) {
+        
+        let date = new Date(listRes[i].date.slice(0,10));
+        datesBooked.push(new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate() ));
+    }
+    console.log(datesBooked);
+}
+
+async function buttonModal(){
+    let button = document.getElementById('buttonModal');
+
+    if (button.textContent = "Create Appointment"){
+        await createAppointment();
+    }
+    else{
+        await deleteAppointment();
+    }
+}
+
+async function deleteAppointment(){
+    let date;
+    let id;
+
+    for (let i = 0; i < daysList.length; i++) {
+        if(daysList[i].classList.contains("selected") ){
+            date = new Date(currYear,currMonth, parseInt(daysList[i].textContent));
+        }
+    }
+
+    if (optionSelected != "None"){
+
+        const res = await getAreas();
+
+        if (optionSelected == "Odontology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Odontology"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if(optionSelected == "General Medicine"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "General Medicine"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if (optionSelected == "Ophthamology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Ophthamology"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if(optionSelected == "Vaccination"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Vaccination"){
+                    id = res[i]._key;
+                }
+            }
+        }
+
+       
+        await deleteAppointment(id,date);
+        
+        //await removeAvailableAppointment(id,date);
+        await onloadAvailableDates(id);
+
+        renderCalendar();
+
+    }
+
+}
 
 homeAdmin();
