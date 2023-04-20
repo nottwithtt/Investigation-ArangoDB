@@ -3,13 +3,22 @@ const express = require('express');
 const app = express();
 
 const bodyParser = require('body-parser');
-const {Database} = require('arangojs')
+const {Database, aql} = require('arangojs');
 
 const db = new Database({
-    url:'http://127.0.0.1:8529',
+    url:'http+tcp://127.0.0.1:8529',
     databaseName: 'DBInvestigation'
 })
 
+db.useBasicAuth('root','2021069645');
+
+db.listCollections()
+  .then(collections => {
+    console.log(`Found ${collections.length} collections.`);
+  })
+  .catch(err => {
+    console.error(err);
+});
 
 //Opens the server.
 app.listen(3000,()=>{
@@ -39,17 +48,50 @@ app.get('/HomeUser',(req,res)=>{
     res.sendFile(__dirname+'/public/HomeUser.html');
 });
 
-
-db.useBasicAuth('root','2021069645');
-
-db.listCollections()
-  .then(collections => {
-    console.log(`Found ${collections.length} collections.`);
-  })
-  .catch(err => {
-    console.error(err);
+app.get('/Appointment',(req,res)=>{
+    res.sendFile(__dirname+'/public/Appointment.html');
 });
 
+
+app.post('/getAdmin',bodyParser.json(),async(req,res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+
+    let isUser = false;
+    let getUser = await getAdmin(username,password);
+
+    if(getUser.length != 0){
+        isUser = true;
+    }
+
+    res.json({"res": getUser,"isUser": isUser});
+})
+
+app.post('/getUser',bodyParser.json(),async(req,res) => {
+    let idCard = req.body.idCard;
+    console.log(idCard);
+
+    
+    let isUser = false;
+    let getUser = await getUserPatient(idCard);
+
+    if(getUser.length != 0){
+        isUser = true;
+    }
+
+    res.json({"res": getUser,"isUser": isUser});
+})
+
+app.post('/addPatient',bodyParser.json(),async(req,res) => {
+    let idCard = req.body.idCard;
+    let name = req.body.name;
+    let lastName = req.body.lastName;
+    let birthday = req.body.birthday;
+
+    await insertUserPatient(idCard,name,lastName,birthday);
+
+    res.json({});
+})
 
 // Insertar un usuario Paciente.
 async function insertUserPatient(identificationCard,firstName, firstSurname, birthDate){
@@ -68,13 +110,14 @@ async function deleteUserPatient(identificationCard){
 }
 
 // se trae todos los usuarios/pacientes. :D
-async function getUserPatient(){
+async function getUserPatient(idCard){
     let collection = db.collection('users');
     let cursor = await db.query(
         aql`FOR doc in ${collection}
+            FILTER doc.identificationCard == ${idCard}
             RETURN doc`)
     let arrayU = await cursor.all();
-    console.log(arrayU)
+    return arrayU;
 }
 
 // getUserPatient();
@@ -94,7 +137,17 @@ async function insertAdmin(username, password){
     })
 }
 
-insertAdmin('nottwithtt', 'pepe');
+async function getAdmin(username,password){
+    let collection = db.collection('admins');
+    let cursor = await db.query(
+        aql`FOR doc in ${collection}
+            FILTER doc.username == ${username} && doc.password == ${password}
+            RETURN doc`)
+    let arrayU = await cursor.all();
+    return arrayU;
+}
+
+//insertAdmin('nottwithtt', 'pepe');
 
 // availableAppointment
 // bookedAppointment
