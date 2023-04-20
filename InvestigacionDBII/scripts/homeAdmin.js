@@ -24,11 +24,14 @@ datesBooked.push(new Date (2023,5,15));
 
 const dateAvailable = new Date (2023,5,15);
 
-
-
 const months = ["January", "February" ,"March", "April", "May", "June", "July",
 "August", "September", "October", "November", "December"];
 // End Calendar
+
+//ComboBox
+const comboBox = document.getElementById("comboAreaAppointment");
+let optionSelected = "None";
+//End ComboBox
 
 function homeAdmin(){
     let usernameAdmin = document.getElementById('userRightCanvas');
@@ -177,11 +180,35 @@ function removeClassSelected(){
 
 function buttonSelected(){
     for (let i = 0; i < daysList.length; i++) {
-        if(daysList[i].classList.contains("selected") && !daysList[i].classList.contains("booked") && !daysList[i].classList.contains("available")){
+        if(daysList[i].classList.contains("selected") ){
             console.log( daysList[i].textContent, currMonth + 1, currYear);
         }
         
     }
+
+    if (optionSelected != "None"){
+        //Obtener todos las areas y obtener el codigo de cada uno para actualizar el calendario con con las citas asociadas.
+        if (optionSelected == "Odontology"){
+
+        }
+        else if(optionSelected == "General Medicine"){
+
+        }
+        else if (optionSelected == "Ophthamology"){
+
+        }
+        else if(optionSelected == "Vaccination"){
+
+        }
+    }
+    
+
 }
+
+comboBox.addEventListener("change", function() {
+    const valorSeleccionado = this.options[this.selectedIndex];
+    optionSelected = valorSeleccionado.text;
+});
+
 
 homeAdmin();
