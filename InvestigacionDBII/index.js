@@ -10,7 +10,7 @@ const db = new Database({
     databaseName: 'DBInvestigation'
 })
 
-db.useBasicAuth('root','2021069645');
+db.useBasicAuth('root','mono4040');
 
 db.listCollections()
   .then(collections => {
@@ -52,6 +52,10 @@ app.get('/Appointment',(req,res)=>{
     res.sendFile(__dirname+'/public/Appointment.html');
 });
 
+
+app.get('/ViewAppointments',(req,res)=>{
+    res.sendFile(__dirname+'/public/ViewAppointments.html');
+})
 
 app.post('/getAdmin',bodyParser.json(),async(req,res) => {
     let username = req.body.username;
@@ -146,6 +150,28 @@ app.post('/getAreas',bodyParser.json(),async(req,res) => {
     res.json({"res": arrayAreas});
 })
 
+app.post('/getAreaById',bodyParser.json(),async(req,res) =>{
+    let id = req.body.idArea
+    let area = await getAreaById(id);
+    res.json({"res": area});
+})
+
+app.post('/getPatientAppointments',bodyParser.json(),async(req,res)=>{
+    let idPatient = req.body.idPatient;
+    let arrayPatientAppointments = await getBookedAppointmentsForPatient(idPatient);
+    res.json({"res": arrayPatientAppointments});
+})
+
+async function getAreaById(idArea){
+    let collection = db.collection('categoryArea');
+    let cursor = await db.query(
+        aql`FOR doc in ${collection}
+        FILTER doc._key == ${idArea}
+        RETURN doc`)
+    let array = await cursor.all();
+    return array;
+}
+
 // Insertar un usuario Paciente.
 async function insertUserPatient(identificationCard,firstName, firstSurname, birthDate){
     let birthday = new Date(birthDate);
@@ -189,6 +215,8 @@ async function insertAdmin(username, password){
         password: password,
     })
 }
+
+//insertAdmin("sully", "1234");
 
 async function getAdmin(username,password){
     let collection = db.collection('admins');
@@ -234,7 +262,8 @@ async function insertBookedAppointment(idArea,dateB,idPatient){
     })
 }
 
-//insertBookedAppointment("43480",new Date(2023,5,1),"118880354");
+//insertBookedAppointment("30591",new Date(2023,3,8),"118720821");
+//insertBookedAppointment("30634", new Date(2023,3,9), "118720821");
 
 async function getAvailableAppointment(){
     let collection =  db.collection('availableAppointment');
@@ -291,15 +320,18 @@ async function getBookedAppointmentsForArea(idArea){
     return array;
 }
 
-async function getbookedAppointmentPatient(idPatient){
+async function getBookedAppointmentsForPatient(idPatient){
+    console.log(idPatient);
     let collection =  db.collection('bookedAppointment');
+
     let cursor = await db.query(
         aql`FOR doc in ${collection}
-            FILTER doc.id_Patient == ${idPatient}
-            RETURN doc`)
+        FILTER doc.id_Patient == ${idPatient}
+        RETURN doc`)
 
     let array = await cursor.all();
     console.log(array);
+    return array;
 }
 
 getAvailableAppointment()
