@@ -160,7 +160,7 @@
     <!-- OFF CANVAS -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasRightLabel">Name LastName</h5>
+            <h5 class="offcanvas-title" id="txtName">Name LastName</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
@@ -180,7 +180,7 @@
     <div class="container" style="padding-left: 15vw; padding-right: 15vw;">
         <div class="row">
             <div class="col-12 mt-4">
-                <p class="h4 mt-3" style="font-family: 'Open Sans' , sans-serif;font-weight: bold; color: #c91414;">Title</p>
+                <p id="Title" class="h4 mt-3" style="font-family: 'Open Sans' , sans-serif;font-weight: bold; color: #c91414;"></p>
             </div>
 
             <div class="wrapper">
@@ -208,6 +208,9 @@
                 </div>
             </div>
 
+            <div class="col mt-2" >
+                <button id="buttonBook" onclick="createAppointment()" type="button" class="btn btn-sm btn-danger">Book Appointment</button>
+            </div>
             
         </div>
     </div>

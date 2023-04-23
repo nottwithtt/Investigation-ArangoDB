@@ -326,6 +326,7 @@ comboBox.addEventListener("change", function() {
 });
 
 async function changeCalendarToArea(){
+    let id;
     if(optionSelected != "None"){
         const res = await getAreas();
 
@@ -333,6 +334,7 @@ async function changeCalendarToArea(){
             for (let i = 0; i < res.length; i++) {
                 if (res[i].name == "Odontology"){
                     id = res[i]._key;
+                    console.log(id);
                 }
             }
         }

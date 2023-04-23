@@ -123,15 +123,16 @@ app.post('/removeAvailableAppointment',bodyParser.json(),async(req,res) => {
 
 
 
-app.post('/addAvailableAppointment',bodyParser.json(),async(req,res) => {
+app.post('/addBookedAppointment',bodyParser.json(),async(req,res) => {
     let idArea = req.body.idArea;
     let date = req.body.date;
-    let idPatient;
+    let idPatient = req.body.idPatient;
 
     await insertBookedAppointment(idArea,date,idPatient);
 
     res.json({});
 })
+
 
 app.post('/getBookedAppointment',bodyParser.json(),async(req,res) => {
     let idArea = req.body.idArea;
@@ -291,6 +292,7 @@ async function getAvailableAppointment(){
 }
 
 async function getAvailableAppointmentsForArea(idArea){
+    console.log(idArea);
     let collection =  db.collection('availableAppointment');
 
     let cursor = await db.query(
