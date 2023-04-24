@@ -57,6 +57,22 @@ async function createAppointmentBox(idArea, date) {
 
 }  
 
+function viewAppointments(){
+    const txtName = document.getElementById('txtName');
+    const txtIdCard = document.getElementById('txtIdCard');
+    const txtBirthday = document.getElementById('txtBirthday');
+
+    txtName.textContent = sessionStorage.getItem("name") + " " + sessionStorage.getItem("lastName");
+    txtIdCard.textContent = sessionStorage.getItem("idCard");
+    txtBirthday.value = sessionStorage.getItem("birthday").slice(0,10);
+}
+
+viewAppointments()
+
+function signOut(){
+    inactive();
+    window.location.href = "/";
+}
 
 async function loadAppointments() {
     idPatient = sessionStorage.getItem("idCard");
