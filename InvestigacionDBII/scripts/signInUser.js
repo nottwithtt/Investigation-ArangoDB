@@ -18,4 +18,10 @@ async function SignInUser(){
         activeUser(getUser[0].identificationCard,getUser[0].fistNameName,getUser[0].fistSurname,getUser[0].birthDate);
         window.location.href ="/HomeUser";
     }
+    else{
+        document.getElementById('msgError').textContent = "Invalid user, try again";
+        const toast = document.querySelector('.toast');
+        const viewToast = new bootstrap.Toast(toast);
+        viewToast.show();
+    }
  }

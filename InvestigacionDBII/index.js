@@ -292,7 +292,6 @@ async function getAvailableAppointment(){
 }
 
 async function getAvailableAppointmentsForArea(idArea){
-    console.log(idArea);
     let collection =  db.collection('availableAppointment');
 
     let cursor = await db.query(

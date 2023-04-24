@@ -160,7 +160,7 @@
     <!-- OFF CANVAS -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="txtName">Name LastName</h5>
+            <h5 class="offcanvas-title" id="txtName"> Name LastName</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
@@ -169,9 +169,14 @@
 
             <label class="h6" for="txtBirthday" style="font-family: 'Open Sans', sans-serif; font-weight: bold; margin-top: 2vw;">Birthday</label>
             <input id="txtBirthday" type="text" class="form-control form-control-sm" value="10-11-2001" aria-label="Birthday" disabled>
-        
+            
+
             <!-- Button SignOut -->
-            <button class="btn btn-danger" type="button" style="margin-top: 26.2vw;">Sign Out</button>
+            <div class="d-flex flex-row justify-content-between"  style="margin-top: 25.2vw;">
+                <a href="/ViewAppointments" type="button" class="btn btn-outline-danger">View Appointments</a> 
+                <button onclick="signOut()" class="btn btn-danger" type="button">Sign Out</button>
+            </div>
+
         
         </div>
     </div>
@@ -212,6 +217,19 @@
                 <button id="buttonBook" onclick="createAppointment()" type="button" class="btn btn-sm btn-danger">Book Appointment</button>
             </div>
             
+        </div>
+    </div>
+
+    <!-- Alert Error -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <img src="../Images/Icons/logoHospitalRojo.png" class="rounded me-2" width="30vw">
+            <strong class="me-auto">Medikare</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body" id="msgError">
+          </div>
         </div>
     </div>
 

@@ -1,3 +1,4 @@
+var toastElList = [].slice.call(document.querySelectorAll('.toast'));
 
 // Session storage
 const username = sessionStorage.getItem("username");
@@ -25,6 +26,8 @@ let datesBookedKeys = {};
 
 const months = ["January", "February" ,"March", "April", "May", "June", "July",
 "August", "September", "October", "November", "December"];
+
+let flagNotAreaOnload = true;
 // End Calendar
 
 //ComboBox
@@ -43,19 +46,29 @@ async function createPatient(){
     const lastNamePatient = document.getElementById('lastNamePatient').value;
     const birthdayPatient = document.getElementById('birthdayPatient').value;
 
+    if(identification && namePatient && lastNamePatient && birthdayPatient){
+        const response = await fetch('/addPatient',{
+            method: "POST",
+            body: JSON.stringify({idCard: identification,
+                                name: namePatient,
+                                lastName: lastNamePatient,
+                                birthday : birthdayPatient}),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
 
-    const response = await fetch('/addPatient',{
-        method: "POST",
-        body: JSON.stringify({idCard: identification,
-                              name: namePatient,
-                              lastName: lastNamePatient,
-                              birthday : birthdayPatient}),
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
+        let responseJason = await response.json();
 
-    let responseJason = await response.json();
+        document.getElementById('msgError2').textContent = "Successfully created";
+        const viewToast = new bootstrap.Toast(toastElList[1]);
+        viewToast.show();
+    }
+    else{
+        document.getElementById('msgError2').textContent = "Invalid or not filled in fields, try again";
+        const viewToast = new bootstrap.Toast(toastElList[1]);
+        viewToast.show();
+    }
     
 }
 
@@ -79,11 +92,9 @@ const renderCalendar = () => {
     for (let i = 1; i <= lastDateOfMonth; i++) {
         let isToday;
         
-        isToday = i === date.getUTCDate() && currMonth === new Date().getUTCMonth()
+        isToday = i === date.getDate() && currMonth === new Date().getUTCMonth()
         && currYear === new Date().getUTCFullYear() ? "active" : "";
         if (isToday != "active"){
-            //isToday = i === dateAvailable.getDate() && currMonth + 1 === dateAvailable.getMonth()
-            //&& currYear === dateAvailable.getFullYear() ? "available" : "";
             for (let j = 0; j < datesAvailable.length; j++) {
                 if((datesAvailable[j].getUTCDate() == i) && (datesAvailable[j].getUTCMonth()== currMonth) &&
                  (datesAvailable[j].getUTCFullYear() == currYear)){
@@ -97,10 +108,6 @@ const renderCalendar = () => {
                         isToday = "booked";
                     }
                 }
-                
-                /*
-                isToday = i === dateAvailable.getDate() && currMonth + 1 === dateAvailable.getMonth()
-                && currYear === dateAvailable.getFullYear() ? "booked" : "";*/
             }
         }
         liTag += `<li class="${isToday}">${i}</li>`;
@@ -326,6 +333,8 @@ comboBox.addEventListener("change", function() {
 });
 
 async function changeCalendarToArea(){
+    flagNotAreaOnload = false;
+
     let id;
     if(optionSelected != "None"){
         const res = await getAreas();
@@ -334,7 +343,6 @@ async function changeCalendarToArea(){
             for (let i = 0; i < res.length; i++) {
                 if (res[i].name == "Odontology"){
                     id = res[i]._key;
-                    console.log(id);
                 }
             }
         }
@@ -360,16 +368,23 @@ async function changeCalendarToArea(){
             }
         }
 
+
         //datesAvailable = await getAvailableAppointmentsForArea(id);
         await onloadAvailableDates(id);
         await onloadBookedDates(id);
 
-
+        
+        renderCalendar();
+        
+        document.getElementById('msgError1').textContent = "Loaded ccorrectly";
+        const viewToast = new bootstrap.Toast(toastElList[0]);
+        viewToast.show();
     }
-    renderCalendar();
+
 }
 
 async function onloadAvailableDates(id){
+
     datesAvailable = [];
     datesAvailableKeys = {};
 
@@ -399,12 +414,46 @@ async function onloadBookedDates(id){
 async function buttonModal(){
     let button = document.getElementById('buttonModal');
 
-    if (button.textContent == "Create Appointment"){
-        await createAppointment();
+    if(comboBox.selectedIndex == 0){
+        document.getElementById('msgError1').textContent = "Unselected appointment area";
+        const viewToast = new bootstrap.Toast(toastElList[0]);
+        viewToast.show();
+    }
+    else if(flagNotAreaOnload){
+        document.getElementById('msgError1').textContent = "Click 'done' to load the appointment area";
+        const viewToast = new bootstrap.Toast(toastElList[0]);
+        viewToast.show();
+    }
+    else if(notSelectedDays()){
+        document.getElementById('msgError1').textContent = "Select a specific day";
+        const viewToast = new bootstrap.Toast(toastElList[0]);
+        viewToast.show();
     }
     else{
-        await deleteAppointment();
+        if (button.textContent == "Create Appointment"){
+            await createAppointment();
+            document.getElementById('msgError1').textContent = "Successfully created";
+            const viewToast = new bootstrap.Toast(toastElList[0]);
+            viewToast.show();
+        }
+        else{
+            await deleteAppointment();
+            document.getElementById('msgError1').textContent = "Successfully eliminated";
+            const viewToast = new bootstrap.Toast(toastElList[0]);
+            viewToast.show();
+        }
     }
+
+}
+
+function notSelectedDays(){
+    let flag = true;
+    for (let i = 0; i < daysList.length; i++) {
+        if(daysList[i].classList.contains('selected')){
+            flag = false;
+        }
+    }
+    return flag;
 }
 
 async function deleteAppointment(){

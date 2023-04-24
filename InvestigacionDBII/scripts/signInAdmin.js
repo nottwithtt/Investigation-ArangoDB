@@ -19,4 +19,10 @@ async function SignInAdmin(){
         activeAdmin(getUser[0].username);
         window.location.href ="/HomeAdmin";
     }
+    else{
+        document.getElementById('msgError').textContent = "Invalid user or password, try again";
+        const toast = document.querySelector('.toast');
+        const viewToast = new bootstrap.Toast(toast);
+        viewToast.show();
+    }
  }

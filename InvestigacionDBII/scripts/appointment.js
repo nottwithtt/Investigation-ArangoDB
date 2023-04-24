@@ -55,9 +55,9 @@ function appointment(){
 }
 
 
-function SignOut() {
+function signOut(){
     inactive();
-    window.location.href ="/";
+    window.location.href = "/";
 }
 
 
@@ -75,12 +75,14 @@ const renderCalendar = () => {
     for (let i = 1; i <= lastDateOfMonth; i++) {
         let isToday;
         
-        isToday = i === date.getUTCDate() && currMonth === new Date().getUTCMonth()
+        isToday = i === date.getDate() && currMonth === new Date().getUTCMonth()
         && currYear === new Date().getUTCFullYear() ? "active" : "";
+
         if (isToday != "active"){
             for (let j = 0; j < datesAvailable.length; j++) {
                 if((datesAvailable[j].getUTCDate() == i) && (datesAvailable[j].getUTCMonth()== currMonth) &&
                  (datesAvailable[j].getUTCFullYear() == currYear)){
+                    
                     isToday = "available";
                 }
             }
@@ -189,7 +191,6 @@ async function createAppointment(){
     }
 
     if (posibleBook){
-
         const res = await getAreas();
 
         if (categoryArea == "Odontology"){
@@ -230,6 +231,16 @@ async function createAppointment(){
 
         renderCalendar();
 
+        document.getElementById('msgError').textContent = "Appointment successfully booked";
+        const toast = document.querySelector('.toast');
+        const viewToast = new bootstrap.Toast(toast);
+        viewToast.show();
+    }
+    else{
+        document.getElementById('msgError').textContent = "Select an available appointment";
+        const toast = document.querySelector('.toast');
+        const viewToast = new bootstrap.Toast(toast);
+        viewToast.show();
     }
     
 
@@ -303,8 +314,6 @@ async function changeCalendarToArea(){
     let id = "";
     const res = await getAreas();
 
-    console.log(res);
-    console.log(categoryArea == "GeneralMedicine");
 
     if (categoryArea == "Odontology"){
         for (let i = 0; i < res.length; i++) {
