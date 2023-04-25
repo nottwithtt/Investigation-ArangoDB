@@ -227,35 +227,6 @@
         </div>
     </div>
 
-    <!-- Create add Patient Modal  -->
-    <div class="modal fade" id="patientModal" tabindex="-1" aria-hidden="true" aria-labelledby="label-modal-1">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <!-- Modal Header  -->
-            <div class="modal-header">
-              <h5 class="modal-title">Add Patient</h5>
-              <button class="btn-close" data-bs-dismiss="modal" aria-labelledby="Back"></button>
-            </div>
-            <!-- Modal Body  -->
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="idCard">Id Card</label>
-                <input class="form-control" type="text" id="idCard" required>
-                <label class="mt-2" for="namePatient">Name</label>
-                <input class="form-control" type="text" id="namePatient" required>
-                <label class="mt-2" for="lastNamePatient">Last Name</label>
-                <input class="form-control" type="text" id="lastNamePatient" required>
-                <label class="mt-2" for="birthdayPatient">Birthday</label>
-                <input class="form-control" type="date" id="birthdayPatient" required>
-              </div>
-            </div>
-            <!-- Modal Footer -->
-            <div class="modal-footer">
-              <button onclick="createPatient()" type="button" class="btn btn-danger">Create Patient</button>
-            </div>
-          </div>
-        </div>
-    </div>
 
     <!-- Modal add Apointment -->
     <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true" aria-labelledby="label-modal-1" >
@@ -311,6 +282,61 @@
           <!-- Modal Footer -->
           <div class="modal-footer">
             <button id="buttonModal" onclick="buttonModal()" type="button" class="btn btn-sm btn-danger">Create Appointment</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Error -->
+      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <img src="../Images/Icons/logoHospitalRojo.png" class="rounded me-2" width="30vw">
+            <strong class="me-auto">Medikare</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body" id="msgError1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create add Patient Modal  -->
+    <div class="modal fade" id="patientModal" tabindex="-1" aria-hidden="true" aria-labelledby="label-modal-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <!-- Modal Header  -->
+          <div class="modal-header">
+            <h5 class="modal-title">Add Patient</h5>
+            <button class="btn-close" data-bs-dismiss="modal" aria-labelledby="Back"></button>
+          </div>
+          <!-- Modal Body  -->
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="idCard">Id Card</label>
+              <input class="form-control" type="text" id="idCard" required>
+              <label class="mt-2" for="namePatient">Name</label>
+              <input class="form-control" type="text" id="namePatient" required>
+              <label class="mt-2" for="lastNamePatient">Last Name</label>
+              <input class="form-control" type="text" id="lastNamePatient" required>
+              <label class="mt-2" for="birthdayPatient">Birthday</label>
+              <input class="form-control" type="date" id="birthdayPatient" required>
+            </div>
+          </div>
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button onclick="createPatient()" type="button" class="btn btn-danger">Create Patient</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <img src="../Images/Icons/logoHospitalRojo.png" class="rounded me-2" width="30vw">
+            <strong class="me-auto">Medikare</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body" id="msgError2">
           </div>
         </div>
       </div>

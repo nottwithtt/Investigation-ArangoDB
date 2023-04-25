@@ -1,3 +1,7 @@
+const params = new URLSearchParams(window.location.search);
+const categoryArea = params.get("category");
+
+//Calendar
 let daySelected = null;
 let daysList;
 
@@ -6,16 +10,56 @@ daysTag = document.querySelector(".days");
 prevNextIcon = document.querySelectorAll(".icons span");
 
 let date = new Date();
-let currYear = date.getFullYear();
-let currMonth = date.getMonth();
+let currYear = date.getUTCFullYear();
+let currMonth = date.getUTCMonth();
+
+let availableBeforeFlag = false;
+let bookedBeforeFlag = false;
 
 
-
-//const dateAvailable = new Date ('10-31-2023');
-const dateAvailable = new Date (2023,5,15);
+let datesAvailable = [];
+let datesAvailableKeys = {};
+let datesBooked = [];
+let datesBookedKeys = {};
 
 const months = ["January", "February" ,"March", "April", "May", "June", "July",
 "August", "September", "October", "November", "December"];
+// End Calendar
+
+//ComboBox
+const comboBox = document.getElementById("comboAreaAppointment");
+let optionSelected = "None";
+//End ComboBox
+
+function appointment(){
+    if(categoryArea == "Odontology"){
+        document.getElementById('Title').textContent = "Odontology";
+    }
+    else if(categoryArea == "GeneralMedicine"){
+        document.getElementById('Title').textContent = "General Medicine";
+    }
+    else if(categoryArea == "Ophthamology"){
+        document.getElementById('Title').textContent = "Ophthamology";
+    }
+    else if(categoryArea == "Vaccination"){
+        document.getElementById('Title').textContent = "Vaccination";
+    }
+    changeCalendarToArea();
+    const txtName = document.getElementById('txtName');
+    const txtIdCard = document.getElementById('txtIdCard');
+    const txtBirthday = document.getElementById('txtBirthday');
+
+    txtName.textContent = sessionStorage.getItem("name") + " " + sessionStorage.getItem("lastName");
+    txtIdCard.textContent = sessionStorage.getItem("idCard");
+    txtBirthday.value = sessionStorage.getItem("birthday").slice(0,10);
+}
+
+
+function signOut(){
+    inactive();
+    window.location.href = "/";
+}
+
 
 const renderCalendar = () => {
     let firstDayOfMonth = new Date(currYear, currMonth,1).getDay();
@@ -31,14 +75,24 @@ const renderCalendar = () => {
     for (let i = 1; i <= lastDateOfMonth; i++) {
         let isToday;
         
-        isToday = i === date.getDate() && currMonth === new Date().getMonth()
-        && currYear === new Date().getFullYear() ? "active" : "";
+        isToday = i === date.getDate() && currMonth === new Date().getUTCMonth()
+        && currYear === new Date().getUTCFullYear() ? "active" : "";
+
         if (isToday != "active"){
-            //isToday = i === dateAvailable.getDate() && currMonth + 1 === dateAvailable.getMonth()
-            //&& currYear === dateAvailable.getFullYear() ? "available" : "";
+            for (let j = 0; j < datesAvailable.length; j++) {
+                if((datesAvailable[j].getUTCDate() == i) && (datesAvailable[j].getUTCMonth()== currMonth) &&
+                 (datesAvailable[j].getUTCFullYear() == currYear)){
+                    
+                    isToday = "available";
+                }
+            }
             if(isToday != "available"){
-                isToday = i === dateAvailable.getDate() && currMonth + 1 === dateAvailable.getMonth()
-                && currYear === dateAvailable.getFullYear() ? "booked" : "";
+                for (let j = 0; j < datesBooked.length; j++) {
+                    if((datesBooked[j].getUTCDate() == i) && (datesBooked[j].getUTCMonth() == currMonth) &&
+                     (datesBooked[j].getUTCFullYear() == currYear)){
+                        isToday = "booked";
+                    }
+                }
             }
         }
         liTag += `<li class="${isToday}">${i}</li>`;
@@ -57,9 +111,29 @@ const renderCalendar = () => {
     daysList.forEach(day => {
         day.addEventListener("click",() =>{
             removeClassSelected();
-            if (!day.classList.contains("inactive")){
+            if (!day.classList.contains("inactive") && !day.classList.contains("booked") && !day.classList.contains("available")){
                 daySelected = day.textContent;
                 day.classList.add("selected");
+
+                let button = document.getElementById('buttonModal');
+                button.textContent = "Create Appointment";
+            }
+            else if (day.classList.contains("available") && !day.classList.contains("inactive")){
+                day.classList.remove("available");
+                daySelected = day.textContent;
+                day.classList.add("selected");
+
+                availableBeforeFlag = true;
+                
+                let button = document.getElementById('buttonModal');
+            }
+            else if (day.classList.contains("booked") && !day.classList.contains("inactive")){
+                day.classList.remove("booked");
+                daySelected = day.textContent;
+                day.classList.add("selected");
+
+                bookedBeforeFlag = true;
+                let button = document.getElementById('buttonModal');
             }
         });
     });
@@ -89,9 +163,218 @@ function removeClassSelected(){
 
     for (let i = 0; i < daysList.length; i++) {
         daysList[i].classList.remove("selected");
+        if (availableBeforeFlag && daysList[i].textContent == daySelected && !daysList[i].classList.contains("inactive")){
+            availableBeforeFlag = false;
+            daysList[i].classList.add("available");
+        }
+        else if (bookedBeforeFlag && daysList[i].textContent == daySelected && !daysList[i].classList.contains("inactive")){
+            bookedBeforeFlag = false;
+            daysList[i].classList.add("booked");
+        }
+
     }
 }
 
 
 
+async function createAppointment(){
+    let date;
+    let id;
 
+    let posibleBook = false;
+
+    for (let i = 0; i < daysList.length; i++) {
+        if(daysList[i].classList.contains("selected") && availableBeforeFlag){
+            date = new Date(currYear,currMonth, parseInt(daysList[i].textContent));
+            posibleBook = true;
+        }
+    }
+
+    if (posibleBook){
+        const res = await getAreas();
+
+        if (categoryArea == "Odontology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Odontology"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if(categoryArea == "GeneralMedicine"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "General Medicine"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if (categoryArea == "Ophthamology"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Ophthamology"){
+                    id = res[i]._key;
+                }
+            }
+        }
+        else if(categoryArea == "Vaccination"){
+            for (let i = 0; i < res.length; i++) {
+                if (res[i].name == "Vaccination"){
+                    id = res[i]._key;
+                }
+            }
+        }
+
+
+        await removeAvailableAppointment(datesAvailableKeys[daySelected]);
+        await createBookedAppointment(id,date,sessionStorage.getItem('idCard'));
+        
+        await onloadAvailableDates(id);
+        await onloadBookedDates(id);
+
+        renderCalendar();
+
+        document.getElementById('msgError').textContent = "Appointment successfully booked";
+        const toast = document.querySelector('.toast');
+        const viewToast = new bootstrap.Toast(toast);
+        viewToast.show();
+    }
+    else{
+        document.getElementById('msgError').textContent = "Select an available appointment";
+        const toast = document.querySelector('.toast');
+        const viewToast = new bootstrap.Toast(toast);
+        viewToast.show();
+    }
+    
+
+}
+
+async function removeAvailableAppointment(idAppointment){
+
+    const response = await fetch('/removeAvailableAppointment',{
+        method: "POST",
+        body: JSON.stringify({idAppointment: idAppointment}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+}
+
+async function createBookedAppointment(idAreaAppointment,dateAppointment,idPatient){
+    const response = await fetch('/addBookedAppointment',{
+        method: "POST",
+        body: JSON.stringify({idArea: idAreaAppointment,
+                              date: dateAppointment,
+                              idPatient :idPatient}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+}
+
+async function getAvailableAppointmentsForArea(idAreas){
+
+    const response = await fetch('/getAvailablesAppointment',{
+        method: "POST",
+        body: JSON.stringify({idArea: idAreas}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+    return responseJason.res;
+}
+
+async function getBookedAppointmentsForArea(idAreas){
+
+    const response = await fetch('/getBookedAppointment',{
+        method: "POST",
+        body: JSON.stringify({idArea: idAreas}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    let responseJason = await response.json();
+    return responseJason.res;
+}
+
+async function getAreas(){
+    const response = await fetch('/getAreas',{
+        method: "POST",
+        body: JSON.stringify({}),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+
+    let responseJason = await response.json();
+    return responseJason.res;
+}
+
+async function changeCalendarToArea(){
+    let id = "";
+    const res = await getAreas();
+
+
+    if (categoryArea == "Odontology"){
+        for (let i = 0; i < res.length; i++) {
+            if (res[i].name == "Odontology"){
+                id = res[i]._key;
+            }
+        }
+    }
+    else if(categoryArea == "GeneralMedicine"){
+        for (let i = 0; i < res.length; i++) {
+            if (res[i].name == "General Medicine"){
+                id = res[i]._key;
+            }
+        }
+    }
+    else if (categoryArea == "Ophthamology"){
+        for (let i = 0; i < res.length; i++) {
+            if (res[i].name == "Ophthamology"){
+                id = res[i]._key;
+            }
+        }
+    }
+    else if(categoryArea == "Vaccination"){
+        for (let i = 0; i < res.length; i++) {
+            if (res[i].name == "Vaccination"){
+                id = res[i]._key;
+            }
+        }
+    }
+
+    await onloadAvailableDates(id);
+    await onloadBookedDates(id);
+    
+    renderCalendar();
+}
+
+async function onloadAvailableDates(id){
+    datesAvailable = [];
+    datesAvailableKeys = {};
+
+    let listRes = await getAvailableAppointmentsForArea(id);
+
+    for (let i = 0; i < listRes.length; i++) {
+        let date = new Date(listRes[i].date_appointment.slice(0,10));
+        datesAvailable.push(new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate()));
+        datesAvailableKeys[date.getUTCDate()] =listRes[i]._key;
+    }
+}
+
+async function onloadBookedDates(id){
+    datesBooked = [];
+    datesBookedKeys = {};
+
+    let listRes = await getBookedAppointmentsForArea(id);
+    
+
+    for (let i = 0; i < listRes.length; i++) {
+        let date = new Date(listRes[i].date.slice(0,10));
+        datesBooked.push(new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate()));
+        datesBookedKeys[date.getUTCDate()] = listRes[i]._key;
+    }
+}
+
+appointment();

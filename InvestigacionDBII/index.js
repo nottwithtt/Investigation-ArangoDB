@@ -73,8 +73,6 @@ app.post('/getAdmin',bodyParser.json(),async(req,res) => {
 
 app.post('/getUser',bodyParser.json(),async(req,res) => {
     let idCard = req.body.idCard;
-    console.log(idCard);
-
     
     let isUser = false;
     let getUser = await getUserPatient(idCard);
@@ -125,15 +123,16 @@ app.post('/removeAvailableAppointment',bodyParser.json(),async(req,res) => {
 
 
 
-app.post('/addAvailableAppointment',bodyParser.json(),async(req,res) => {
+app.post('/addBookedAppointment',bodyParser.json(),async(req,res) => {
     let idArea = req.body.idArea;
     let date = req.body.date;
-    let idPatient;
+    let idPatient = req.body.idPatient;
 
     await insertBookedAppointment(idArea,date,idPatient);
 
     res.json({});
 })
+
 
 app.post('/getBookedAppointment',bodyParser.json(),async(req,res) => {
     let idArea = req.body.idArea;
@@ -141,6 +140,14 @@ app.post('/getBookedAppointment',bodyParser.json(),async(req,res) => {
     let availableAppointments = await getBookedAppointmentsForArea(idArea);
 
     res.json({"res": availableAppointments});
+})
+
+app.post('/removeBookedAppointment',bodyParser.json(),async(req,res) => {
+    let idAppointment = req.body.idAppointment;
+
+    await deleteBookedAppointment(idAppointment);
+
+    res.json({});
 })
 
 app.post('/getAreas',bodyParser.json(),async(req,res) => {
@@ -262,8 +269,17 @@ async function insertBookedAppointment(idArea,dateB,idPatient){
     })
 }
 
+async function deleteBookedAppointment(idAppointment){
+    let collection =  db.collection('bookedAppointment');
+    
+    await db.query(
+        aql`FOR doc in ${collection}
+        FILTER doc._key == ${idAppointment}
+        REMOVE doc in ${collection}`)
+}
+
 //insertBookedAppointment("30591",new Date(2023,3,8),"118720821");
-//insertBookedAppointment("30634", new Date(2023,3,9), "118720821");
+//insertBookedAppointment("43480", new Date(2023,1,30), "118720821");
 
 async function getAvailableAppointment(){
     let collection =  db.collection('availableAppointment');
@@ -273,7 +289,6 @@ async function getAvailableAppointment(){
         RETURN doc`)
 
     let array = await cursor.all();
-    console.log(array)
 }
 
 async function getAvailableAppointmentsForArea(idArea){
@@ -303,11 +318,9 @@ async function getBookedAppointments(){
         aql`FOR doc in ${collection}
         RETURN doc`)
     let array = await cursor.all();
-    console.log(array);
 }
 
 async function getBookedAppointmentsForArea(idArea){
-    console.log(idArea);
     let collection =  db.collection('bookedAppointment');
 
     let cursor = await db.query(
@@ -316,12 +329,10 @@ async function getBookedAppointmentsForArea(idArea){
         RETURN doc`)
 
     let array = await cursor.all();
-    console.log(array);
     return array;
 }
 
 async function getBookedAppointmentsForPatient(idPatient){
-    console.log(idPatient);
     let collection =  db.collection('bookedAppointment');
 
     let cursor = await db.query(
@@ -330,7 +341,6 @@ async function getBookedAppointmentsForPatient(idPatient){
         RETURN doc`)
 
     let array = await cursor.all();
-    console.log(array);
     return array;
 }
 
