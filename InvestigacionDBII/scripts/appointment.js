@@ -18,9 +18,7 @@ let bookedBeforeFlag = false;
 
 
 let datesAvailable = [];
-let datesAvailableKeys = {};
 let datesBooked = [];
-let datesBookedKeys = {};
 
 const months = ["January", "February" ,"March", "April", "May", "June", "July",
 "August", "September", "October", "November", "December"];
@@ -74,16 +72,17 @@ const renderCalendar = () => {
 
     for (let i = 1; i <= lastDateOfMonth; i++) {
         let isToday;
+        let idAppointmentDB;
         
         isToday = i === date.getDate() && currMonth === new Date().getUTCMonth()
         && currYear === new Date().getUTCFullYear() ? "active" : "";
 
         if (isToday != "active"){
             for (let j = 0; j < datesAvailable.length; j++) {
-                if((datesAvailable[j].getUTCDate() == i) && (datesAvailable[j].getUTCMonth()== currMonth) &&
-                 (datesAvailable[j].getUTCFullYear() == currYear)){
-                    
+                if((datesAvailable[j].date.getUTCDate() == i) && (datesAvailable[j].date.getUTCMonth()== currMonth) &&
+                 (datesAvailable[j].date.getUTCFullYear() == currYear)){
                     isToday = "available";
+                    idAppointmentDB = datesAvailable[j].id;
                 }
             }
             if(isToday != "available"){
@@ -95,7 +94,12 @@ const renderCalendar = () => {
                 }
             }
         }
-        liTag += `<li class="${isToday}">${i}</li>`;
+        if(idAppointmentDB){
+            liTag += `<li id="${idAppointmentDB}" class="${isToday}">${i}</li>`;
+        }
+        else{
+            liTag += `<li class="${isToday}">${i}</li>`;
+        }
     }
 
     for (let i = lastDayOfMonth; i < 6; i++) {
@@ -180,6 +184,7 @@ function removeClassSelected(){
 async function createAppointment(){
     let date;
     let id;
+    let idAppointmentDB;
 
     let posibleBook = false;
 
@@ -187,6 +192,7 @@ async function createAppointment(){
         if(daysList[i].classList.contains("selected") && availableBeforeFlag){
             date = new Date(currYear,currMonth, parseInt(daysList[i].textContent));
             posibleBook = true;
+            idAppointmentDB = daysList[i].id;
         }
     }
 
@@ -223,7 +229,7 @@ async function createAppointment(){
         }
 
 
-        await removeAvailableAppointment(datesAvailableKeys[daySelected]);
+        await removeAvailableAppointment(idAppointmentDB);
         await createBookedAppointment(id,date,sessionStorage.getItem('idCard'));
         
         await onloadAvailableDates(id);
@@ -352,20 +358,17 @@ async function changeCalendarToArea(){
 
 async function onloadAvailableDates(id){
     datesAvailable = [];
-    datesAvailableKeys = {};
 
     let listRes = await getAvailableAppointmentsForArea(id);
 
     for (let i = 0; i < listRes.length; i++) {
         let date = new Date(listRes[i].date_appointment.slice(0,10));
-        datesAvailable.push(new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate()));
-        datesAvailableKeys[date.getUTCDate()] =listRes[i]._key;
+        datesAvailable.push({"id": listRes[i]._key, "date" : new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate())});
     }
 }
 
 async function onloadBookedDates(id){
     datesBooked = [];
-    datesBookedKeys = {};
 
     let listRes = await getBookedAppointmentsForArea(id);
     
@@ -373,7 +376,6 @@ async function onloadBookedDates(id){
     for (let i = 0; i < listRes.length; i++) {
         let date = new Date(listRes[i].date.slice(0,10));
         datesBooked.push(new Date (date.getUTCFullYear(),date.getUTCMonth(), date.getUTCDate()));
-        datesBookedKeys[date.getUTCDate()] = listRes[i]._key;
     }
 }
 
