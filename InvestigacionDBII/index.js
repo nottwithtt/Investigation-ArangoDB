@@ -10,7 +10,7 @@ const db = new Database({
     databaseName: 'DBInvestigation'
 })
 
-db.useBasicAuth('root','mono4040');
+db.useBasicAuth('root','Soldadojeff01');
 
 db.listCollections()
   .then(collections => {
@@ -216,7 +216,7 @@ async function insertAdmin(username, password){
     })
 }
 
-//insertAdmin("sully", "1234");
+//insertAdmin("Gravehg", "passAdmin");
 
 async function getAdmin(username,password){
     let collection = db.collection('admins');
